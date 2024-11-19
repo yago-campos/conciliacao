@@ -1,0 +1,39 @@
+C:/Users/PC_PLAYER/Downloads/portal_conciliacao/portal_conciliacao (raiz do projeto)
+
+/.next
+/components
+	Footer.js
+	Login.js
+/MSD_GSC
+/node_modules
+/ORGANON_GSC
+/pages
+	/api
+		concilia.js
+		funcoesDeConcilia.js
+		uploads.js
+	_app.js
+	app.py
+	home.js
+	index.js
+	next.config.js
+	privacidade.js
+	termos.js
+/public
+	/uploads
+		/resultados
+	/images
+		fundoverdefuncional.jpg
+/scripts
+	conciliacao_apsen_dimed.py
+	conciliacao_apsen_gam.py
+	conciliacao_apsen_gjb.py
+	conciliacao_apsen_gsc.py
+	conciliacao_msd_agille.py
+	conciliacao_msd_gsc.py
+	conciliacao_organon_gsc.py
+/styles
+	style.css
+conciliacao.py
+package.js
+package-lock.js
