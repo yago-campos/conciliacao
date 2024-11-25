@@ -1,12 +1,12 @@
 // pages/api/funcoesDeConcilia.js
-import * as conciliaApsenDimed from '../scripts/conciliação_apsen_dimed';
-import * as conciliaApsenGam from '../scripts/conciliação_apsen_gam';
-import * as conciliaApsenGjb from '../scripts/conciliação_apsen_gjb';
-import * as conciliaApsenGsc from '../scripts/conciliação_apsen_gsc';
-import * as conciliaMsdAgille from '../scripts/conciliação_msd_agille';
-import * as conciliaMsdGsc from '../scripts/conciliação_msd_gsc';
-import * as conciliaOrganonGsc from '../scripts/conciliação_organon_gsc';
-import * as conciliaBayerGsc from '../scripts/conciliação_bayer_gsc';
+import * as conciliaApsenDimed from '../scripts/conciliacao_apsen_dimed';
+import * as conciliaApsenGam from '../scripts/conciliacao_apsen_gam';
+import * as conciliaApsenGjb from '../scripts/conciliacao_apsen_gjb';
+import * as conciliaApsenGsc from '../scripts/conciliacao_apsen_gsc';
+import * as conciliaMsdAgille from '../scripts/conciliacao_msd_agille';
+import * as conciliaMsdGsc from '../scripts/conciliacao_msd_gsc';
+import * as conciliaOrganonGsc from '../scripts/conciliacao_organon_gsc';
+import * as conciliaBayerGsc from '../scripts/conciliacao_bayer_gsc';
 
 export async function processarConciliação(baseFuncional, baseDistribuidor, pfMargem, industria, distribuidor) {
   try {
