@@ -4,6 +4,5 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/home": "pages/home.js",
-  "/ia": "pages/ia.js",
-  "/api/concilia": "pages/api/concilia.js"
+  "/ia": "pages/ia.js"
 }
