@@ -4,6 +4,7 @@ import openpyxl
 import time
 import numpy as np
 import re
+import sys
 
 # Função para remover as aspas simples do CNPJ
 def remover_aspas_cnpj(cnpj):
@@ -22,67 +23,35 @@ def remove_decimal_suffix(value):
         return value[:-2]
     return value
 
+
 # Definição dos arquivos de origem e destino
-arquivo_origem = 'Agille_BaseDistribuidor.xlsx'
-arquivo_destino = 'Template.xlsx'
+arquivo_distribuidor = sys.argv[2] 
+arquivo_funcional = sys.argv[1] 
+arquivo_pf_margem = sys.argv[3]
 
-# Cria um arquivo de destino vazio se ele não existir
-if not os.path.exists(arquivo_destino):
-    with pd.ExcelWriter(arquivo_destino, engine='openpyxl') as writer:
-        pd.DataFrame().to_excel(writer, index=False)
-        
-# Leitura das bases de dados
-dados_origem = pd.read_excel(arquivo_origem)
-dados_destino = pd.read_excel(arquivo_destino)
+# 1. Carregar o arquivo baseDistribuidor
+print('Lendo o arquivo do distribuidor...')
+try:
+    base_distribuidor = pd.read_excel(arquivo_distribuidor, skiprows=1)
+except Exception as e:
+    print(f"Erro ao carregar o arquivo baseDistribuidor: {e}")
+    sys.exit(1)
 
-# Define as colunas de interesse e suas renomeações
-colunas_interesse = {
-    "NOTA": "NOTA",
-    "RAZAO": "RAZAO",
-    "CODPROD": "CODPROD",
-    "DESCRICAO": "DESCRICAO",
-    "DATANF": "DATANF",
-    "QTDE": "QTDE",
-    "VALOR":"VALOR",
-    "QTDE_VLR": "QTDE_VLR",
-    "EAN": "EAN",
-    "CNPJ": "CNPJ",
-    "SPEDIDO": "SPEDIDO",
-    "CIDADE": "CIDADE",
-    "UF": "UF",
-    "FORNE": "FORNE",
-    "PFABRICA": "PFABRICA",
-    "PEDIDO": "PEDIDO"
-}
-
-# Seleção e renomeação das colunas de interesse
-dados_interesse = dados_origem[list(colunas_interesse.keys())].rename(columns=colunas_interesse)
-
-# Concatenar os dados de interesse ao arquivo destino (vazio neste caso)
-dados_destino = pd.concat([dados_destino, dados_interesse], axis=1)
-
-# Salvar a concatenação no arquivo Distribuidor.xlsx
-dados_destino.to_excel('Distribuidor.xlsx', index=False)
-os.remove(arquivo_destino)
-print("As colunas foram copiadas com sucesso para o arquivo Distribuidor.xlsx.")
-
-#########################################################################################
-
-# Início do processamento adicional
-print('Lendo a base Funcional...')
-caminho_arquivo = 'Agille_BaseFuncional.xlsx'
-
-print('Carregando a base Funcional...')
-arquivo = openpyxl.load_workbook(caminho_arquivo)
-
-print('Selecionando a aba ativa...')
-planilha = arquivo.active
-
-arquivo.save('Funcional_pode_excluir.xlsx')
-
-print('Lendo as bases...')
-base_funcional = pd.read_excel('Funcional_pode_excluir.xlsx')
-base_distribuidor = pd.read_excel('Distribuidor.xlsx')
+# 2. Carregar o arquivo baseFuncional usando OpenPyxl
+print('Lendo o arquivo baseFuncional...')
+try:
+    arquivo = openpyxl.load_workbook(arquivo_funcional)
+    print('Selecionando a aba ativa...')
+    planilha = arquivo.active
+    tabela_intervalo = f'A1:{planilha.cell(row=1, column=planilha.max_column).column_letter}{planilha.max_row}'
+    tabela = openpyxl.worksheet.table.Table(displayName="TabelaSimples", ref=tabela_intervalo)
+    planilha.add_table(tabela)
+    dados = planilha.values
+    colunas = next(dados)  # A primeira linha é o cabeçalho
+    base_funcional = pd.DataFrame(dados, columns=colunas)
+except Exception as e:
+    print(f"Erro ao carregar o arquivo baseFuncional: {e}")
+    sys.exit(1)
 
 # Formatar CNPJ nas bases
 base_funcional['CNPJ'] = base_funcional['CNPJ'].apply(remover_aspas_cnpj).apply(format_cnpj)
@@ -214,6 +183,3 @@ with pd.ExcelWriter('Conciliação Finalizada Agille.xlsx', engine='openpyxl') a
     base_funcional.to_excel(writer, sheet_name='Funcional', index=False)
 
 print('Finalizado!')
-
-os.remove('Funcional_pode_excluir.xlsx')
-os.remove('Distribuidor.xlsx')

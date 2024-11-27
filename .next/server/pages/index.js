@@ -66,6 +66,17 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
+/***/ "@opentelemetry/api":
+/*!*************************************!*\
+  !*** external "@opentelemetry/api" ***!
+  \*************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@opentelemetry/api");
+
+/***/ }),
+
 /***/ "next/dist/compiled/next-server/pages.runtime.dev.js":
 /*!**********************************************************************!*\
   !*** external "next/dist/compiled/next-server/pages.runtime.dev.js" ***!

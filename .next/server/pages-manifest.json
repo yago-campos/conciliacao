@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
   "/home": "pages/home.js",
-  "/ia": "pages/ia.js"
+  "/api/concilia": "pages/api/concilia.js",
+  "/": "pages/index.js"
 }

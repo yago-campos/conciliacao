@@ -2,13 +2,14 @@ from flask import Flask, request, jsonify, send_from_directory
 import subprocess
 import os
 import logging
+import snowflake.connector
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
 # Configuração do diretório de upload e logging
 UPLOAD_FOLDER = "uploads"
-RESULTS_FOLDER = "results"  # Pasta onde o arquivo final será salvo
+RESULTS_FOLDER = "public/uploads/resultados"  # Caminho correto da pasta de resultados
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)  # Cria o diretório para os resultados
 
@@ -16,6 +17,22 @@ logging.basicConfig(level=logging.INFO)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
+
+# Configuração da conexão com o Snowflake
+def get_snowflake_connection():
+    try:
+        conn = snowflake.connector.connect(
+            user='yagocampos',
+            password='R4tF1sh3r$Snowflake',
+            account='xzqggdu-fua20629',
+            warehouse='DEV',
+            database='DEV_DB',
+            schema='PUBLIC'
+        )
+        return conn
+    except Exception as e:
+        logging.error(f"Erro ao conectar ao Snowflake: {e}")
+        raise
 
 @app.route('/conciliar', methods=['POST'])
 def conciliar():
@@ -55,12 +72,29 @@ def download_conciliacao():
     # Caminho do arquivo final gerado pela conciliação
     final_file_path = os.path.join(RESULTS_FOLDER, 'Conciliação Finalizada.xlsx')
 
-    # Verifica se o arquivo final existew
+    # Verifica se o arquivo final existe
     if not os.path.exists(final_file_path):
         return jsonify({"error": "Arquivo final não encontrado."}), 404
 
     # Serve o arquivo final para download
     return send_from_directory(RESULTS_FOLDER, 'Conciliação Finalizada.xlsx', as_attachment=True)
+
+@app.route('/dados', methods=['GET'])
+def get_dados():
+    try:
+        conn = get_snowflake_connection()
+        cursor = conn.cursor()
+
+        # Executa uma consulta no Snowflake
+        cursor.execute("SELECT * FROM tabela_exemplo LIMIT 10")  # Substitua por sua tabela e consulta
+        rows = cursor.fetchall()
+
+        # Transforma os dados em um formato legível (JSON)
+        data = [{"coluna1": row[0], "coluna2": row[1]} for row in rows]  # Ajuste conforme as colunas
+        return jsonify(data)
+    except Exception as e:
+        logging.error(f"Erro ao buscar dados no Snowflake: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
