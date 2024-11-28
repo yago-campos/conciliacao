@@ -2,12 +2,12 @@ import snowflake.connector
 
 try:
     conn = snowflake.connector.connect(
-        user='yagocampos',
-        password='R4tF1sh3r$Snowflake',
-        account='xzqggdu-fua20629',
-        warehouse='DEV',
-        database='DEV_DB',
-        schema='PUBLIC'
+        user='BARATONA',
+        password='y4T#8pLz@3QmW$9K',
+        account='lia24005.us-east-1',
+        warehouse='WH_BARATONA',
+        database='BARATONA',
+        schema='TRANSIENT'
     )
     cursor = conn.cursor()
     cursor.execute("SELECT CURRENT_USER(), CURRENT_ACCOUNT();")

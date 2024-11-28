@@ -1,7 +1,6 @@
 import sys
 import pandas as pd
 import openpyxl
-import time
 import numpy as np
 
 # Função para remover as aspas simples do CNPJ
