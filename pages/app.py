@@ -56,6 +56,8 @@ def conciliar():
         # Seleciona e executa o script Python com base na indústria e no distribuidor
         if industria == 'msd' and distribuidor == 'GSC':
             subprocess.run(['python', 'scripts/conciliação_msd_gsc.py'], check=True)
+        elif industria == 'bayer' and distribuidor == 'GSC':
+             subprocess.run(['python', 'scripts/conciliação_bayer_gsc.py'], check=True)
         else:
             return jsonify({"error": f"Indústria ou distribuidor não reconhecido"}), 400
 

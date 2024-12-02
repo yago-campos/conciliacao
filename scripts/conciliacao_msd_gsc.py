@@ -1,6 +1,5 @@
 import sys
 import pandas as pd
-import openpyxl
 import numpy as np
 
 # Função para remover as aspas simples do CNPJ
@@ -21,8 +20,8 @@ def remove_decimal_suffix(value):
     return value
 
 # Definição dos arquivos de origem e destino
-arquivo_distribuidor = sys.argv[2] 
-arquivo_funcional = sys.argv[1] 
+arquivo_funcional = sys.argv[1]
+arquivo_distribuidor = sys.argv[2]
 arquivo_pf_margem = sys.argv[3]
 
 # 1. Carregar o arquivo baseDistribuidor
@@ -36,15 +35,14 @@ except Exception as e:
 # 2. Carregar o arquivo baseFuncional usando OpenPyxl
 print('Lendo o arquivo baseFuncional...')
 try:
-    arquivo = openpyxl.load_workbook(arquivo_funcional)
-    print('Selecionando a aba ativa...')
-    planilha = arquivo.active
-    tabela_intervalo = f'A1:{planilha.cell(row=1, column=planilha.max_column).column_letter}{planilha.max_row}'
-    tabela = openpyxl.worksheet.table.Table(displayName="TabelaSimples", ref=tabela_intervalo)
-    planilha.add_table(tabela)
-    dados = planilha.values
-    colunas = next(dados)  # A primeira linha é o cabeçalho
-    base_funcional = pd.DataFrame(dados, columns=colunas)
+    # Carregando o arquivo CSV
+    base_funcional = pd.read_excel(arquivo_funcional)
+    print('Arquivo CSV carregado com sucesso.')
+
+    # Verificando as colunas e preparando a base de dados
+    colunas = base_funcional.columns.tolist()  # Lista de colunas do CSV
+    print(f'Colunas encontradas: {colunas}')
+
 except Exception as e:
     print(f"Erro ao carregar o arquivo baseFuncional: {e}")
     sys.exit(1)

@@ -10,9 +10,10 @@ const Home = () => {
   const [pfMargemFile, setPfMargemFile] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState(''); // Estado para a URL de download
 
+  // Função para tratar a lógica de conciliação
   const handleConciliacao = async () => {
     setMensagem('Processando, por favor aguarde...');
-    setDownloadUrl(''); // Limpa URL de download antes de começar o processo
+    setDownloadUrl(''); // Limpa a URL de download antes de começar
 
     const formData = new FormData();
     formData.append('industria', industria);
@@ -20,7 +21,7 @@ const Home = () => {
     formData.append('baseFuncional', baseFuncionalFile);
     formData.append('baseDistribuidor', baseDistribuidorFile);
 
-    if (industria === 'msd' && distribuidor === 'gsc' && pfMargemFile) {
+    if ((industria === 'msd' || industria === 'bayer') && distribuidor === 'gsc' && pfMargemFile) {
       formData.append('pfMargem', pfMargemFile);
     }
 
@@ -33,7 +34,7 @@ const Home = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.downloadUrl) {
-          setDownloadUrl(data.downloadUrl); // Define a URL de download se estiver presente
+          setDownloadUrl(data.downloadUrl);
           setMensagem('Conciliação realizada com sucesso!');
         } else {
           setMensagem('Erro: URL de download não encontrada.');
@@ -50,8 +51,6 @@ const Home = () => {
 
   return (
     <div>
-
-
       <header>
         <h1>Processo de Conciliação</h1>
       </header>
@@ -92,6 +91,11 @@ const Home = () => {
                       <option value="agille">Agille</option>
                     </>
                   )}
+                  {industria === 'bayer' && (
+                    <>
+                      <option value="gsc">GSC</option>
+                    </>
+                  )}
                 </select>
               </label>
             )}
@@ -106,7 +110,7 @@ const Home = () => {
               <input type="file" onChange={(e) => setBaseDistribuidorFile(e.target.files[0])} />
             </label>
 
-            {industria === 'msd' && distribuidor === 'gsc' && (
+            {(industria === 'msd' || industria === 'bayer') && distribuidor === 'gsc' && (
               <label>
                 Arquivo PF Margem:
                 <input type="file" onChange={(e) => setPfMargemFile(e.target.files[0])} />
@@ -117,42 +121,16 @@ const Home = () => {
             <p>{mensagem}</p>
 
             {/* Exibe o botão de download se a URL estiver disponível */}
-            {downloadUrl ? (
+            {downloadUrl && (
               <a href={downloadUrl} download="resultado_conciliacao.xlsx">
                 <button>Baixar Resultado</button>
               </a>
-            ) : (
-              <p></p>
             )}
           </div>
         </section>
       </main>
 
       <style jsx>{`
-        nav.menu {
-          background-color: #333;
-          color: white;
-          padding: 10px;
-        }
-
-        nav.menu ul {
-          display: flex;
-          justify-content: space-around;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-
-        nav.menu ul li a {
-          color: white;
-          text-decoration: none;
-          font-weight: bold;
-        }
-
-        nav.menu ul li a:hover {
-          text-decoration: underline;
-        }
-
         header {
           background-color: #4CAF50;
           color: white;

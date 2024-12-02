@@ -1,4 +1,3 @@
-// pages/api/funcoesDeConcilia.js
 import * as conciliaApsenDimed from '../scripts/conciliação_apsen_dimed';
 import * as conciliaApsenGam from '../scripts/conciliação_apsen_gam';
 import * as conciliaApsenGjb from '../scripts/conciliação_apsen_gjb';

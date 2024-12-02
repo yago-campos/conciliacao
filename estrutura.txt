@@ -2,11 +2,8 @@ C:/Users/PC_PLAYER/Downloads/portal_conciliacao/portal_conciliacao (raiz do proj
 
 /.next
 /components
-	Footer.js
 	Login.js
-/MSD_GSC
 /node_modules
-/ORGANON_GSC
 /pages
 	/api
 		concilia.js

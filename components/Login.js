@@ -8,9 +8,7 @@ const Login = () => {
 
   // Lista de usuários e senhas
   const validUsers = [
-    { username: 'cs', password: 'cs' },
-    { username: 'admin', password: 'admin' },
-    { username: 'coordenadorcs', password: 'coordenador' },
+    { username: 'cs', password: 'cs' }
   ];
 
   const handleSubmit = (e) => {
