@@ -4,6 +4,7 @@ import * as conciliaApsenGjb from '../scripts/conciliação_apsen_gjb';
 import * as conciliaApsenGsc from '../scripts/conciliação_apsen_gsc';
 import * as conciliaMsdAgille from '../scripts/conciliação_msd_agille';
 import * as conciliaMsdGsc from '../scripts/conciliação_msd_gsc';
+import * as conciliaMsdoncoprod from '../scripts/conciliação_msd_oncoprod';
 import * as conciliaOrganonGsc from '../scripts/conciliação_organon_gsc';
 import * as conciliaBayerGsc from '../scripts/conciliação_bayer_gsc';
 
@@ -36,6 +37,9 @@ export async function processarConciliação(baseFuncional, baseDistribuidor, pf
           break;
         case 'gsc':
           resultado = await conciliaMsdGsc.processar(baseFuncional, baseDistribuidor, pfMargem, industria);
+          break;
+        case 'oncoprod':
+          resultado = await conciliaMsdoncoprod.processar(baseFuncional, baseDistribuidor, pfMargem, industria);
           break;
         default:
           throw new Error(`Distribuidor ${distribuidor} não encontrado para a indústria MSD.`);

@@ -1,7 +1,7 @@
 import pandas as pd
-import os
 import openpyxl
 from collections import defaultdict
+import sys
 
 # Função para remover as aspas simples do CNPJ
 def remover_aspas_cnpj(cnpj):
@@ -61,92 +61,33 @@ def mapear_chave_secundaria(row, base):
         return "NF não localizada"  # Nota não encontrada
 
 # Definição dos arquivos de origem e destino
-arquivo_origem = 'Distribuidor_GSC.xlsx'
-arquivo_destino = 'Template.xlsx'
+arquivo_funcional = sys.argv[1]
+arquivo_distribuidor = sys.argv[2]
 
-# Cria um arquivo de destino vazio se ele não existir
-if not os.path.exists(arquivo_destino):
-    with pd.ExcelWriter(arquivo_destino, engine='openpyxl') as writer:
-        pd.DataFrame().to_excel(writer, index=False)
+# 1. Carregar o arquivo baseDistribuidor
+print('Lendo o arquivo do distribuidor...')
+try:
+    base_distribuidor = pd.read_excel(arquivo_distribuidor, skiprows=1)
+except Exception as e:
+    print(f"Erro ao carregar o arquivo baseDistribuidor: {e}")
+    sys.exit(1)
 
-# Leitura das bases de dados
-dados_origem = pd.read_excel(arquivo_origem, sheet_name='Consolidado', skiprows=1)
-dados_destino = pd.read_excel(arquivo_destino)
 
-# Define as colunas de interesse e suas renomeações
-colunas_interesse = {
-    'Tipo Venda': 'Tipo Venda',
-    'CD': 'CD',
-    'Fornecedor': 'Fornecedor',
-    'Oferta': 'Oferta',
-    'Indústria': 'Indústria',
-    'Projeto Conectividade': 'Projeto Conectividade',
-    'Descr Proj/VAN': 'Descr Proj/VAN',
-    'Cliente': 'Cliente',
-    'CNPJ': 'CNPJ',
-    'UF': 'UF',
-    'Código Bandeira': 'Código Bandeira',
-    'Descrição Bandeira': 'Descrição Bandeira',
-    'Produto': 'Produto',
-    'Descrição Produto': 'Descrição Produto',
-    'Código EAN': 'Código EAN',
-    'Tipo estratégico': 'Tipo estratégico',
-    'Pedido Venda': 'Pedido Venda',
-    'Pedido OL': 'Pedido OL',
-    'Nr. Nota': 'Nr. Nota',
-    'Data': 'Data',
-    'DC. Ent': 'DC. Ent',
-    'Margem': 'Margem',
-    'Qtd': 'Qtd',
-    'VPF': 'VPF',
-    '% DC PDV Comercial': '% DC PDV Comercial',
-    '% Desc. Comercial Industria': '% Desc. Comercial Industria',
-    '% Desc. Financeiro Industria': '% Desc. Financeiro Industria',
-    '% Ressarc': '% Ressarc',
-    'Vlr. Ressar. Dinheiro': 'Vlr. Ressar. Dinheiro',
-    'Vlr. Ressar. Repos. Mercadoria': 'Vlr. Ressar. Repos. Mercadoria',
-    'A.D.': 'A.D.',
-    'DANFE': 'DANFE',
-    '% Soma OL': '% Soma OL',
-    'Vlr Ressarc Desc Soma OL': 'Vlr Ressarc Desc Soma OL',
-    '% Soma OL Financ': '% Soma OL Financ',
-    'Vlr Soma OL Financ': 'Vlr Soma OL Financ',
-    '% Desconto Adicional': '% Desconto Adicional',
-    'Vlr Voucher Ind': 'Vlr Voucher Ind',
-    '% ICMS Destino': '% ICMS Destino',
-    '% ICMS Origem': '% ICMS Origem',
-    '% Repasse': '% Repasse',
-    'Tipo Proj': 'Tipo Proj'
-}
-
-# Seleção e renomeação das colunas de interesse
-dados_interesse = dados_origem[list(colunas_interesse.keys())].rename(columns=colunas_interesse)
-
-# Concatenar os dados de interesse ao arquivo destino (vazio neste caso)
-dados_destino = pd.concat([dados_destino, dados_interesse], axis=1)
-
-# Salvar a concatenação no arquivo Distribuidor.xlsx
-dados_destino.to_excel('Distribuidor.xlsx', index=False)
-os.remove(arquivo_destino)
-print("As colunas foram copiadas com sucesso para o arquivo Distribuidor.xlsx.")
-
-#########################################################################################
-
-# Início do processamento adicional
-print('Lendo a base Funcional...')
-caminho_arquivo = 'Funcional.xlsx'
-
-print('Carregando a base Funcional...')
-arquivo = openpyxl.load_workbook(caminho_arquivo)
-
-print('Selecionando a aba ativa...')
-planilha = arquivo.active
-
-arquivo.save('Funcional_pode_excluir.xlsx')
-
-print('Lendo as bases...')
-base_funcional = pd.read_excel('Funcional_pode_excluir.xlsx')
-base_distribuidor = pd.read_excel('Distribuidor.xlsx')
+# 2. Carregar o arquivo baseFuncional usando OpenPyxl
+print('Lendo o arquivo baseFuncional...')
+try:
+    arquivo = openpyxl.load_workbook(arquivo_funcional)
+    print('Selecionando a aba ativa...')
+    planilha = arquivo.active
+    tabela_intervalo = f'A1:{planilha.cell(row=1, column=planilha.max_column).column_letter}{planilha.max_row}'
+    tabela = openpyxl.worksheet.table.Table(displayName="TabelaSimples", ref=tabela_intervalo)
+    planilha.add_table(tabela)
+    dados = planilha.values
+    colunas = next(dados)  # A primeira linha é o cabeçalho
+    base_funcional = pd.DataFrame(dados, columns=colunas)
+except Exception as e:
+    print(f"Erro ao carregar o arquivo baseFuncional: {e}")
+    sys.exit(1)
 
 # Formatar CNPJ nas bases
 base_funcional['CNPJ'] = base_funcional['CNPJ'].apply(remover_aspas_cnpj).apply(format_cnpj).astype(str)
@@ -248,10 +189,8 @@ base_funcional.drop(columns=['CNPJ+NF', 'CNPJ+NF+EAN', 'Quantidade Somada'], inp
 base_distribuidor.drop(columns=['CNPJ+NF', 'Quantidade Somada'], inplace=True)
 
 # salvar em duas abas diferentes do mesmo arquivo
-with pd.ExcelWriter('Conciliação Finalizada Santa Cruz.xlsx', engine='openpyxl') as writer:
+with pd.ExcelWriter('Conciliacao_Finalizada_Santa_Cruz.xlsx', engine='openpyxl') as writer:
     base_distribuidor.to_excel(writer, sheet_name='Distribuidor', index=False)
     base_funcional.to_excel(writer, sheet_name='Funcional', index=False)
 
-os.remove('Funcional_pode_excluir.xlsx')
-os.remove('Distribuidor.xlsx')
 print("Processo concluído com sucesso!")

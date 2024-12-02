@@ -31,8 +31,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Campos de indústria e distribuidor são obrigatórios' });
     }
 
-    if (!files.baseFuncional || !files.baseDistribuidor || (!files.pfMargem && !(industria === 'bayer' && distribuidor === 'gsc'))) {
-      return res.status(400).json({ message: 'Arquivos obrigatórios estão faltando' });
+    // Verificação específica para msd e GSC
+    if (!files.baseFuncional || !files.baseDistribuidor || 
+        (!files.pfMargem && (industria === 'msd' && distribuidor === 'gsc'))) {
+      return res.status(400).json({ message: 'Arquivos obrigatórios estão faltando. O arquivo "pfMargem" é necessário'});
     }
 
     const arquivoFuncional = files.baseFuncional[0].filepath;

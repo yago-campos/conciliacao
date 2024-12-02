@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, send_from_directory
 import subprocess
 import os
 import logging
-import snowflake.connector
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -18,21 +17,6 @@ logging.basicConfig(level=logging.INFO)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 
-# Configuração da conexão com o Snowflake
-def get_snowflake_connection():
-    try:
-        conn = snowflake.connector.connect(
-            user='BARATONA',
-            password='y4T#8pLz@3QmW$9K',
-            account='lia24005.us-east-1',
-            warehouse='WH_BARATONA',
-            database='BARATONA',
-            schema='TRANSIENT'
-        )
-        return conn
-    except Exception as e:
-        logging.error(f"Erro ao conectar ao Snowflake: {e}")
-        raise
 
 @app.route('/conciliar', methods=['POST'])
 def conciliar():
@@ -55,11 +39,11 @@ def conciliar():
     try:
         # Seleciona e executa o script Python com base na indústria e no distribuidor
         if industria == 'msd' and distribuidor == 'GSC':
-            subprocess.run(['python', 'scripts/conciliação_msd_gsc.py'], check=True)
+            subprocess.run(['python', 'scripts/conciliacao_msd_gsc.py'], check=True)
         elif industria == 'bayer' and distribuidor == 'GSC':
-             subprocess.run(['python', 'scripts/conciliação_bayer_gsc.py'], check=True)
+            subprocess.run(['python', 'scripts/conciliacao_bayer_gsc.py'], check=True)
         else:
-            return jsonify({"error": f"Indústria ou distribuidor não reconhecido"}), 400
+            return jsonify({"error": "Indústria ou distribuidor não reconhecido."}), 400
 
         return jsonify({"message": "Conciliação realizada com sucesso!"})
     except subprocess.CalledProcessError as e:
@@ -67,36 +51,26 @@ def conciliar():
         return jsonify({"error": "Erro na execução do script de conciliação."}), 500
     except Exception as e:
         logging.exception("Erro inesperado")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Erro interno. Por favor, contate o suporte."}), 500
+
 
 @app.route('/download/conciliacao_finalizada', methods=['GET'])
 def download_conciliacao():
     # Caminho do arquivo final gerado pela conciliação
-    final_file_path = os.path.join(RESULTS_FOLDER, 'Conciliação Finalizada.xlsx')
+    final_file_path = os.path.join(RESULTS_FOLDER, 'Conciliacao_Finalizada.xlsx')
 
     # Verifica se o arquivo final existe
     if not os.path.exists(final_file_path):
         return jsonify({"error": "Arquivo final não encontrado."}), 404
 
     # Serve o arquivo final para download
-    return send_from_directory(RESULTS_FOLDER, 'Conciliação Finalizada.xlsx', as_attachment=True)
+    return send_from_directory(
+        RESULTS_FOLDER,
+        'Conciliacao_Finalizada.xlsx',
+        as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
-@app.route('/dados', methods=['GET'])
-def get_dados():
-    try:
-        conn = get_snowflake_connection()
-        cursor = conn.cursor()
-
-        # Executa uma consulta no Snowflake
-        cursor.execute("SELECT * FROM tabela_exemplo LIMIT 10")  # Substitua por sua tabela e consulta
-        rows = cursor.fetchall()
-
-        # Transforma os dados em um formato legível (JSON)
-        data = [{"coluna1": row[0], "coluna2": row[1]} for row in rows]  # Ajuste conforme as colunas
-        return jsonify(data)
-    except Exception as e:
-        logging.error(f"Erro ao buscar dados no Snowflake: {e}")
-        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
